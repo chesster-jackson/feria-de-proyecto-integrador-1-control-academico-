@@ -1,19 +1,54 @@
+from generador_de_archivos import generar_certificado_pdf
 import re
 from datetime import datetime
 
-estudiantes = []
+#funcion para salir 
+def confirmar_entrada(mensaje):
+    respuesta = input(mensaje).strip().lower()
+    return respuesta != "salir"
 
+# Función para calcular promedio
 def calcular_promedio(notas):
-    return sum(notas) / len(notas) if notas else 0.0
+    return sum(notas) / len(notas) if notas else 0
 
-# -------------------------------
-# Función para agregar estudiante
-# -------------------------------
+
+# Función  para pedir datos con confirmación
+def pedir_dato(mensaje, validar=None, ejemplo=None, mayus=False):
+    while True:
+        valor = input(f"   → {mensaje}: ").strip()
+        if mayus:
+            valor = valor.upper()
+
+        if validar and not validar(valor):
+            print(f"⚠️ Formato inválido.", end=" ")
+            if ejemplo:
+                print(f"Ejemplo: {ejemplo}")
+            else:
+                print()
+            continue
+
+        if not valor:
+            print("⚠️ Este campo no puede estar vacío.")
+            continue
+
+        print(f"   ✅ Has ingresado: {valor}")
+        print("   ¿Deseas confirmar este dato?")
+        print("   1. Confirmar")
+        print("   2. Modificar")
+        opcion = input("   Elige (1-2): ").strip()
+        if opcion == "1":
+            return valor
+        else:
+            print("   🔁 Reingresa el dato...")
+
+
+# Función principal agregar estudiante
 def agregar_estudiante(estudiantes):
-    print("="*50)
-    print("📌 Registro de nuevos estudiantes")
-    print("="*50)
+    print("="*70)
+    print("📌 REGISTRO DE NUEVOS ESTUDIANTES")
+    print("="*70)
 
+    # Pedir cantidad
     while True:
         try:
             cantidad_estudiantes = int(input("¿Cuántos estudiantes deseas agregar?: ").strip())
@@ -25,64 +60,49 @@ def agregar_estudiante(estudiantes):
             print("⚠️ Valor inválido. Intenta de nuevo.")
 
     for i in range(cantidad_estudiantes):
-        print("\n" + "-"*50)
+        print("\n" + "-"*70)
         print(f"🧑‍🎓 Estudiante {i+1}")
-        print("-"*50)
+        print("-"*70)
 
-        # Nombre
-        while True:
-            nombre = input("Nombre: ").strip()
-            if nombre:
-                break
-            print("⚠️ El nombre no puede estar vacío.")
+        # ========== DATOS PERSONALES ==========
+        print("\n👤 DATOS PERSONALES")
+        print("-"*70)
+        nombre = pedir_dato("Nombre")
+        apellido = pedir_dato("Apellido")
 
-        # Apellido
-        while True:
-            apellido = input("Apellido: ").strip()
-            if apellido:
-                break
-            print("⚠️ El apellido no puede estar vacío.")
+        nombre_completo = f"{nombre} {apellido}"
+        print(f"\n✅ Nombre completo registrado: {nombre_completo}")
 
-        # Cédula (formato 000-000000-0000A)
-        while True:
-            cedula = input("Cédula (formato 000-000000-0000A): ").strip().upper()
-            if not cedula:
-                print("⚠️ La cédula no puede estar vacía.")
-            elif not re.fullmatch(r"\d{3}-\d{6}-\d{4}[A-Z]", cedula):
-                print("⚠️ Formato inválido. Ejemplo: 001-123456-0000a")
-            else:
-                break
+        # ========== IDENTIFICACIÓN ==========
+        print("\n🪪 IDENTIFICACIÓN")
+        print("-"*70)
+        cedula = pedir_dato(
+            "Cédula (000-000000-0000A)",
+            validar=lambda c: re.fullmatch(r"\d{3}-\d{6}-\d{4}[A-Z]", c),
+            ejemplo="001-123456-0000A",
+            mayus=True
+        )
 
-        # Carnet
-        while True:
-            carnet = input("Número de carnet (formato 25-00000-0): ").strip()
-            if not carnet:
-                print("⚠️ El carnet no puede estar vacío.")
-            elif any(est["carnet"] == carnet for est in estudiantes):
-                print("⚠️ Ya existe un estudiante con ese carnet.")
-            elif not re.fullmatch(r"\d{2}-\d{5}-\d", carnet):
-                print("⚠️ Formato inválido. Ejemplo correcto: 25-0000-0")
-            else:
-                break
+        carnet = pedir_dato(
+            "Carnet (25-00000-0)",
+            validar=lambda c: re.fullmatch(r"\d{2}-\d{5}-\d", c),
+            ejemplo="25-00000-0"
+        )
 
-        # Municipio
-        while True:
-            municipio = input("Municipio: ").strip()
-            if municipio:
-                break
-            print("⚠️ El municipio no puede estar vacío.")
+        # ========== UBICACIÓN ==========
+        print("\n📍 UBICACIÓN")
+        print("-"*70)
+        municipio = pedir_dato("Municipio")
+        departamento = pedir_dato("Departamento")
 
-        # Departamento
-        while True:
-            departamento = input("Departamento: ").strip()
-            if departamento:
-                break
-            print("⚠️ El departamento no puede estar vacío.")
+        # ========== DATOS PERSONALES EXTRA ==========
+        print("\n📆 DATOS ADICIONALES")
+        print("-"*70)
 
         # Edad
         while True:
             try:
-                edad = int(input("Edad: ").strip())
+                edad = int(pedir_dato("Edad"))
                 if edad > 0:
                     break
                 else:
@@ -90,156 +110,119 @@ def agregar_estudiante(estudiantes):
             except ValueError:
                 print("⚠️ Ingresa un número válido.")
 
-        # Género (selección numérica)
+        # Género
         while True:
-            try:
-                print("\nGénero:")
-                print("1. Masculino")
-                print("2. Femenino")
-                op = int(input("Elige (1-2): ").strip())
-                if op == 1:
-                    genero = "M"
-                    break
-                elif op == 2:
-                    genero = "F"
-                    break
-                else:
-                    print("⚠️ Opción inválida.")
-            except ValueError:
-                print("⚠️ Ingresa un número válido.")
-
-        # Sangre
-        while True:
-            sangre = input("Tipo de sangre (ej: A+, O-, B+): ").strip().upper()
-            if sangre:
+            print("\n   → Género:")
+            print("     1. Masculino")
+            print("     2. Femenino")
+            op = input("     Elige (1-2): ").strip()
+            if op == "1":
+                genero = "M"
                 break
-            print("⚠️ El tipo de sangre no puede estar vacío.")
-
-        # Modalidad (selección numérica)
-        while True:
-            try:
-                print("\nModalidad:")
-                print("1. Presencial")
-                print("2. Virtual")
-                print("3. Mixta")
-                op = int(input("Elige (1-3): ").strip())
-                if op == 1:
-                    modalidad = "Presencial"
-                    break
-                elif op == 2:
-                    modalidad = "Virtual"
-                    break
-                elif op == 3:
-                    modalidad = "Mixta"
-                    break
-                else:
-                    print("⚠️ Opción inválida.")
-            except ValueError:
-                print("⚠️ Ingresa un número válido.")
-
-        # Situación académica (selección numérica)
-        while True:
-            try:
-                print("\nSituación académica:")
-                print("1. Regular")
-                print("2. Sabatino")
-                print("3. Dominical")
-                op = int(input("Elige (1-3): ").strip())
-                if op == 1:
-                    situacion = "Regular"
-                    break
-                elif op == 2:
-                    situacion = "Sabatino"
-                    break
-                elif op == 3:
-                    situacion = "Dominical"
-                    break
-                else:
-                    print("⚠️ Opción inválida.")
-            except ValueError:
-                print("⚠️ Ingresa un número válido.")
-
-        # Carrera
-        while True:
-            carrera = input("Nombre de la carrera: ").strip()
-            if carrera:
+            elif op == "2":
+                genero = "F"
                 break
-            print("⚠️ La carrera no puede estar vacía.")
+            else:
+                print("⚠️ Opción inválida.")
 
-        # Año (anio)
+        sangre = pedir_dato("Tipo de sangre (A+, O-, B+)", mayus=True)
+
+        # ========== DATOS ACADÉMICOS ==========
+        print("\n🎓 DATOS ACADÉMICOS")
+        print("-"*70)
+
+        while True:
+            print("\n   → Modalidad:")
+            print("     1. Presencial")
+            print("     2. Virtual")
+            print("     3. Mixta")
+            op = input("     Elige (1-3): ").strip()
+            if op == "1":
+                modalidad = "Presencial"
+                break
+            elif op == "2":
+                modalidad = "Virtual"
+                break
+            elif op == "3":
+                modalidad = "Mixta"
+                break
+            else:
+                print("⚠️ Opción inválida.")
+
+        while True:
+            print("\n   → Situación académica:")
+            print("     1. Regular")
+            print("     2. Sabatino")
+            print("     3. Dominical")
+            op = input("     Elige (1-3): ").strip()
+            if op == "1":
+                situacion = "Regular"
+                break
+            elif op == "2":
+                situacion = "Sabatino"
+                break
+            elif op == "3":
+                situacion = "Dominical"
+                break
+            else:
+                print("⚠️ Opción inválida.")
+
+        carrera = pedir_dato("Carrera")
+
         while True:
             try:
-                anio = int(input("Año actual ( 1,2,3,...6 ): ").strip())
+                anio = int(pedir_dato("Año actual (1-6)"))
                 if 1 <= anio <= 6:
                     break
-                else:
-                    print("⚠️ El año debe rondar de 1 al 6.")
+                print("⚠️ El año debe estar entre 1 y 6.")
             except ValueError:
                 print("⚠️ Ingresa un número válido.")
 
-        # Ciclo
         while True:
             try:
-                ciclo = int(input("Ciclo (1 o 2): ").strip())
+                ciclo = int(pedir_dato("Ciclo (1 o 2)"))
                 if ciclo in [1, 2]:
                     break
-                else:
-                    print("⚠️ Solo puede ser 1 o 2.")
+                print("⚠️ Solo puede ser 1 o 2.")
             except ValueError:
                 print("⚠️ Ingresa un número válido.")
 
-        # Semestre
         while True:
             try:
-                semestre = int(input("Semestre (1 o 2): ").strip())
+                semestre = int(pedir_dato("Semestre (1 o 2)"))
                 if semestre in [1, 2]:
                     break
-                else:
-                    print("⚠️ Solo puede ser 1 o 2.")
+                print("⚠️ Solo puede ser 1 o 2.")
             except ValueError:
                 print("⚠️ Ingresa un número válido.")
 
-        # Área de conocimiento
-        while True:
-            area = input("Área de conocimiento: ").strip()
-            if area:
-                break
-            print("⚠️ El área de conocimiento no puede estar vacía.")
+        area = pedir_dato("Área de conocimiento")
 
-        # Idiomas
+        # ========== IDIOMAS ==========
+        print("\n🗣️ IDIOMAS")
+        print("-"*70)
         idiomas = []
-        while True:
-            try:
-                cantidad_idiomas = int(input("¿Cuántos idiomas domina?: ").strip())
-                if cantidad_idiomas >= 0:
-                    break
-                else:
-                    print("⚠️ Debe ser cero o un número positivo.")
-            except ValueError:
-                print("⚠️ Número inválido.")
+        try:
+            cantidad_idiomas = int(pedir_dato("¿Cuántos idiomas domina?"))
+        except ValueError:
+            cantidad_idiomas = 0
 
         for j in range(cantidad_idiomas):
-            while True:
-                idioma = input(f" - Idioma {j+1}: ").strip()
-                if idioma:
-                    idiomas.append(idioma)
-                    break
-                print("⚠️ El idioma no puede estar vacío.")
+            idioma = pedir_dato(f"Idioma {j+1}")
+            idiomas.append(idioma)
 
-        # Materia
-        while True:
-            materia = input("Materia : ").strip()
-            if materia:
-                break
-            print("⚠️ La materia no puede estar vacía.")
+        # ========== MATERIA Y NOTAS ==========
+        print("\n📚 MATERIAS Y NOTAS")
+        print("-"*70)
 
-        # Notas (4 parciales)
+        materia = pedir_dato("Materia")
+
         notas = []
-        print("📖 Ingrese las notas de los 4 parciales (0-100):")
+        print("   → Ingrese las notas de los 4 parciales (0-100):")
         for p in range(1, 5):
             while True:
                 try:
-                    nota = float(input(f" Parcial {p}: ").strip())
+                    nota = float(pedir_dato(f"Parcial {p}"))
                     if 0 <= nota <= 100:
                         notas.append(nota)
                         break
@@ -249,8 +232,6 @@ def agregar_estudiante(estudiantes):
                     print("⚠️ Ingresa un número válido.")
 
         promedio = calcular_promedio(notas)
-
-        # Fecha de registro
         fecha_registro = datetime.now().strftime("%d/%m/%Y %H:%M:%S")
 
         estudiantes.append({
@@ -277,44 +258,48 @@ def agregar_estudiante(estudiantes):
             "fecha_registro": fecha_registro,
             "ultima_modificacion": None
         })
-        print("✅ Estudiante agregado correctamente.")
 
+        print("\n✅ Estudiante agregado correctamente.\n")
+        print(f"📅 Fecha de registro: {fecha_registro}")
+        print("-"*70)
+estudiantes = [] 
 # -------------------------------
-# Mostrar lista completa
-# -------------------------------
+#  Mostrar lista completa
 def mostrar_lista(estudiantes):
     if not estudiantes:
         print("⚠️ No hay estudiantes registrados.")
         return
 
-    print("="*50)
-    print("📋 Lista completa de estudiantes")
-    print("="*50)
+    print("="*60)
+    print("📋 LISTA COMPLETA DE ESTUDIANTES")
+    print("="*60)
 
     for est in estudiantes:
-        estado = "Aprobado ✅" if est["promedio"] >= 60 else "Reprobado ❌"
-        print("\n" + "-"*50)
+        print("\n" + "-"*60)
         print(f"👤 Nombre completo: {est['nombre']} {est['apellido']}")
-        print(f"🪪 Cédula: {est['cedula']}")
-        print(f"🎟 Carnet: {est['carnet']}")
+        print(f"🪪 Cédula: {est['cedula']} | 🎟 Carnet: {est['carnet']}")
         print(f"📍 Municipio: {est['municipio']} | Departamento: {est['departamento']}")
-        print(f"🎂 Edad: {est['edad']} | Género: {est['genero']} | Sangre: {est['sangre']}")
+        print(f"🎂 Edad: {est['edad']} | Género: {est['genero']} | Tipo de sangre: {est['sangre']}")
         print(f"🎓 Carrera: {est['carrera']} | Año: {est['anio']} | Ciclo: {est['ciclo']} | Semestre: {est['semestre']}")
         print(f"🏫 Modalidad: {est['modalidad']} | Situación académica: {est['situacion']}")
         print(f"📚 Área de conocimiento: {est['area']}")
         print(f"🗣 Idiomas: {', '.join(est['idiomas']) if est['idiomas'] else 'Ninguno'}")
         print(f"📘 Materia inscrita: {est['materia']}")
-        # Mostrar nota por parcial y promedio
+        
+        # Mostrar notas de forma ordenada
+        print("📝 Notas parciales:")
         for idx, n in enumerate(est['notas'], start=1):
-            print(f"   - Parcial {idx}: {n:.2f}")
-        print(f"   -> Promedio: {est['promedio']:.2f} | Estado: { 'Aprobado ✅' if est['promedio'] >= 60 else 'Reprobado ❌'}")
+            print(f"   Parcial {idx}: {n:.2f}")
+        
+        print(f"   ➤ Promedio: {est['promedio']:.2f} | Estado: {'Aprobado ✅' if est['promedio'] >= 60 else 'Reprobado ❌'}")
         print(f"📅 Fecha de registro: {est['fecha_registro']}")
         if est.get("ultima_modificacion"):
             print(f"✏️ Última modificación: {est['ultima_modificacion']}")
+        print("-"*60)
         print("-"*50)
 
 # -------------------------------
-# Buscar estudiante (y opción editar/eliminar)
+#  Buscar estudiante (y opción editar/eliminar)
 # -------------------------------
 def buscar_estudiante(estudiantes):
     try:
@@ -371,7 +356,7 @@ def buscar_estudiante(estudiantes):
         print(f"⚠️ Error en búsqueda: {e}")
 
 # -------------------------------
-# Eliminar estudiante
+#  Eliminar estudiante
 # -------------------------------
 def eliminar_estudiante(estudiantes, carnet_confirm=None):
     try:
@@ -380,7 +365,7 @@ def eliminar_estudiante(estudiantes, carnet_confirm=None):
         else:
             carnet = input("Ingrese el carnet del estudiante a eliminar (formato 25-0000-0): ").strip()
         if not re.fullmatch(r"\d{2}-\d{5}-\d", carnet):
-            print("⚠️ Formato inválido. Ejemplo: 25-0000-0")
+            print("⚠️ Formato inválido. Ejemplo: 25-00000-0")
             return
         for i, est in enumerate(estudiantes):
             if est["carnet"] == carnet:
@@ -397,7 +382,7 @@ def eliminar_estudiante(estudiantes, carnet_confirm=None):
         print(f"⚠️ Error al eliminar: {e}")
 
 # -------------------------------
-# Editar estudiante (por campos)
+# 5 Editar estudiante (por campos)
 # -------------------------------
 def editar_estudiante(estudiantes, est):
     try:
@@ -686,36 +671,80 @@ def mostrar_menu():
     print("2. Buscar / Ver / Editar estudiante (por carnet)")
     print("3. Eliminar estudiante (por carnet)")
     print("4. Mostrar lista de estudiantes")
-    print("5. Salir")
+    print("5. Generar certificados PDF")
+    print("6. Salir")
 
 # -------------------------------
 # Función principal
 # -------------------------------
 def main():
-    print("="*50)
+    print("=" * 50)
     print("✨ Bienvenido al Sistema de Control de Notas ✨")
-    print("="*50)
+    print("=" * 50)
     while True:
         mostrar_menu()
         try:
-            opcion = input("Seleccione una opción (1-5): ").strip()
+            opcion = input("Seleccione una opción (1-6): ").strip()
             if opcion == "1":
-                agregar_estudiante(estudiantes)
+                mensaje = ("   Para cancelar la operación y volver al menú, escribe 'salir'.\n   Presiona Enter para continuar...")
+                if confirmar_entrada(mensaje):  # si confirma, continúa
+                    agregar_estudiante(estudiantes)
+                else:
+                    print("↩️ Operación cancelada. Regresando al menú principal.")
+
             elif opcion == "2":
-                buscar_estudiante(estudiantes)
+                mensaje = ("   Para cancelar la operación y volver al menú, escribe 'salir'.\n   Presiona Enter para continuar...")
+                if confirmar_entrada(mensaje):
+                    buscar_estudiante(estudiantes)
+                else:
+                    print("↩️ Operación cancelada. Regresando al menú principal.")
+
             elif opcion == "3":
-                eliminar_estudiante(estudiantes)
+                mensaje = ("   Para cancelar la operación y volver al menú, escribe 'salir'.\n   Presiona Enter para continuar...")
+                if confirmar_entrada(mensaje):
+                    eliminar_estudiante(estudiantes)
+                else:
+                    print("↩️ Operación cancelada. Regresando al menú principal.")
+
             elif opcion == "4":
-                mostrar_lista(estudiantes)
+                mensaje = ("   Para cancelar la operación y volver al menú, escribe 'salir'.\n   Presiona Enter para continuar...")
+                if confirmar_entrada(mensaje):
+                    mostrar_lista(estudiantes)
+                else:
+                    print("↩️ Operación cancelada. Regresando al menú principal.")
+
             elif opcion == "5":
+                mensaje = ("   Para cancelar la operación y volver al menú, escribe 'salir'.\n   Presiona Enter para continuar...")
+                if confirmar_entrada(mensaje):
+                    gen = input("  Ingrese el carnet del estudiante para generar su certificado individualmente: ").strip()
+                    if gen.lower() == "salir":
+                        print("↩️ Operación cancelada. Regresando al menú principal.")
+                        continue
+                    if gen:
+                        encontrado = False
+                        for est in estudiantes:
+                            if est["carnet"] == gen:
+                                nombre_pdf = f"certificado_{est['carnet'].replace('-', '_')}.pdf"
+                                generar_certificado_pdf(est, nombre_pdf)
+                                encontrado = True
+                                break
+                        if not encontrado:
+                            print(f"⚠️ No se encontró al estudiante con número de carnet {gen}.")
+                    else:
+                        print("⚠️ Carnet vacío. Intente de nuevo.")
+                else:
+                    print("↩️ Operación cancelada. Regresando al menú principal.")
+
+            elif opcion == "6":
                 print("👋 Gracias por usar el sistema. ¡Hasta pronto!")
                 break
+
             else:
                 print("⚠️ Opción inválida. Intente de nuevo.")
+
         except Exception as e:
             print(f"⚠️ Error inesperado en el menú: {e}")
 
 # Ejecutar programa
 if __name__ == "__main__":
     main()
-
