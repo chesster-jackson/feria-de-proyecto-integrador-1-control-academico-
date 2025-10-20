@@ -1,6 +1,7 @@
 from generador_de_archivos import generar_certificado_pdf
 import re
 from datetime import datetime
+from Anime import animacion, Fore, Style, init
 
 #funcion para salir 
 def confirmar_entrada(mensaje):
@@ -682,12 +683,13 @@ def main():
     print("✨ Bienvenido al Sistema de Control de Notas ✨")
     print("=" * 50)
     while True:
+        animacion()
         mostrar_menu()
         try:
             opcion = input("Seleccione una opción (1-6): ").strip()
             if opcion == "1":
                 mensaje = ("   Para cancelar la operación y volver al menú, escribe 'salir'.\n   Presiona Enter para continuar...")
-                if confirmar_entrada(mensaje):  # si confirma, continúa
+                if confirmar_entrada(mensaje): 
                     agregar_estudiante(estudiantes)
                 else:
                     print("↩️ Operación cancelada. Regresando al menú principal.")
