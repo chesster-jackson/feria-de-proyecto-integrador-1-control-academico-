@@ -679,11 +679,11 @@ def mostrar_menu():
 # Función principal
 # -------------------------------
 def main():
-    print("=" * 50)
-    print("✨ Bienvenido al Sistema de Control de Notas ✨")
-    print("=" * 50)
+    print(Fore.GREEN + "=" * 50)
+    print(Fore.GREEN + "✨ Bienvenido al Sistema de Control de Notas ✨")
+    print(Fore.GREEN + "=" * 50)
+    animacion()
     while True:
-        animacion()
         mostrar_menu()
         try:
             opcion = input("Seleccione una opción (1-6): ").strip()

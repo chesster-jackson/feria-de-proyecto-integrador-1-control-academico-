@@ -4,9 +4,9 @@ import sys
 from colorama import Fore, Style, init
 
 def animacion(mensaje="Inicializando el sistema"):
-    print(Fore.CYAN + "\n" + "="*60)
-    print(Fore.YELLOW + f"🔧 {mensaje}...".center(60))
-    print(Fore.CYAN + "="*60)
+    print(Fore.GREEN +  "="*60)
+    print(Fore.GREEN + f"🔧 {mensaje}...".center(60))
+    print(Fore.GREEN + "="*60)
 
     animacion = ["|", "/", "-", "\\"]
     for i in range(20):
