@@ -1,3 +1,4 @@
+# Animacion de entrada del sistema
 from colorama import Fore, Style, init
 import sys
 import time
@@ -16,7 +17,7 @@ def animacion(mensaje="Inicializando el sistema"):
             sys.stdout.flush()
             time.sleep(0.12)
 
-        print("\r" + Fore.GREEN + " El sistema se ha iniciado correctamente. Espere un momento...         ")
+        print("\r" + Fore.GREEN + " El sistema se ha iniciado correctamente.         ")
         time.sleep(0.6)
     except Exception:
         pass

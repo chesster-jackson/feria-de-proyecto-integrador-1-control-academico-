@@ -1,3 +1,4 @@
+# Generador de pdf de certificados de calificaciones
 from reportlab.lib import colors
 from reportlab.lib.pagesizes import A4
 from reportlab.platypus import SimpleDocTemplate, Table, TableStyle, Paragraph, Spacer
@@ -20,9 +21,9 @@ def generar_PDF(estudiante, nombre_pdf, registrar_accion=None):
         story.append(Paragraph("<b>INFORME DE CALIFICACIONES</b>", estilo_titulo))
         story.append(Spacer(1, 8))
         info = (f"<b>Nombre:</b> {estudiante.get('nombre','')} {estudiante.get('apellido','')}<br/>"
-                f"<b>Carnet:</b> {estudiante.get('carnet','')} &nbsp;&nbsp; <b>Cédula:</b> {estudiante.get('cedula','')}<br/>"
-                f"<b>Carrera:</b> {estudiante.get('carrera','')} &nbsp;&nbsp; <b>Año:</b> {estudiante.get('anio','')}<br/>"
-                f"<b>Fecha:</b> {datetime.now().strftime('%d/%m/%Y')}")
+        f"<b>Carnet:</b> {estudiante.get('carnet','')} &nbsp;&nbsp; <b>Cédula:</b> {estudiante.get('cedula','')}<br/>"
+        f"<b>Carrera:</b> {estudiante.get('carrera','')} &nbsp;&nbsp; <b>Año:</b> {estudiante.get('anio','')} &nbsp;&nbsp; <b>Ciclo:</b> {estudiante.get('ciclo','')}<br/>"
+        f"<b>Fecha:</b> {datetime.now().strftime('%d/%m/%Y')}")
         story.append(Paragraph(info, estilo_normal))
         story.append(Spacer(1, 12))
 
@@ -81,7 +82,7 @@ def generar_PDF(estudiante, nombre_pdf, registrar_accion=None):
         story.append(Spacer(1, 18))
         story.append(Paragraph("<b>Firma del/a universitario:</b> ______________________", estilo_normal))
         doc.build(story)
-        print(f"✅ PDF generado: {ruta}")
+        print(f" PDF generado: {ruta}")
         if registrar_accion:
             registrar_accion(f"Se generó certificado PDF para {estudiante['nombre']} {estudiante['apellido']} ({estudiante['carnet']})")
         return estudiante.get("carnet")
