@@ -57,7 +57,7 @@ def mostrar_pendientes():
     if not cola_pendientes:
         print(" No hay estudiantes pendientes.")
         return
-    print("\n COLA DE ESTUDIANTES PENDIENTES:")
+    print("\n COLA DE ESTUDIANTES PENDIENTES POR REALIZAR PDF:")
     for i, est in enumerate(cola_pendientes, start=1):
         print(f"{i}. {est['nombre']} {est['apellido']} - {est['carnet']}")
 
@@ -123,7 +123,18 @@ def agregar_estudiante():
         print("\n" + "="*70)
         print(" REGISTRO DE NUEVOS ESTUDIANTES")
         print("="*70)
-        cantidad_estudiantes = pedir_dato_confirmar("¿Cuántos estudiantes deseas agregar?", int, validar=lambda x: x > 0, ejemplo="1")
+
+        cantidad_estudiantes = pedir_dato_confirmar(
+            "¿Cuántos estudiantes deseas agregar?",
+            int,
+            validar=lambda x: x > 0,
+            ejemplo="1"
+        )
+
+        if cantidad_estudiantes == "ATRAS":
+            print("\n Operación cancelada. Regresando al menú principal...")
+            return
+
         for i in range(1, cantidad_estudiantes + 1):
             print("\n" + "-"*60)
             print(f" Estudiante {i}")
@@ -138,42 +149,86 @@ def agregar_estudiante():
             }
 
             pasos = [
-                ("nombre", lambda: pedir_dato_confirmar("Nombre", str, mayus=True)),
-                ("apellido", lambda: pedir_dato_confirmar("Apellido", str, mayus=True)),
-                ("cedula", lambda: pedir_dato_confirmar("Cédula (000-000000-0000A)", str,
-                    validar=lambda v: bool(re.fullmatch(r"\d{3}-\d{6}-\d{4}[A-Z]", v)), ejemplo="001-123456-0000A", mayus=True)),
-                ("carnet", lambda: pedir_dato_confirmar("Carnet (25-00000-0)", str,
-                    validar=lambda v: bool(re.fullmatch(r"\d{2}-\d{5}-0", v)), ejemplo="25-02365-0")),
+                ("nombre", lambda: pedir_dato_confirmar(
+                    "Nombre",
+                    str,
+                    validar=lambda v: bool(re.fullmatch(r"[A-Za-zÁÉÍÓÚáéíóúÑñ ]+", v)),
+                    mayus=True
+                )),
+                ("apellido", lambda: pedir_dato_confirmar(
+                    "Apellido",
+                    str,
+                    validar=lambda v: bool(re.fullmatch(r"[A-Za-zÁÉÍÓÚáéíóúÑñ ]+", v)),
+                    mayus=True
+                )),
+                ("cedula", lambda: (
+                    lambda d: (
+                        d if not any(e["cedula"] == d for e in estudiantes)
+                        else (
+                            print(f"     Ya existe un estudiante con la cédula {d}. Intenta otra."),
+                            "DUPLICADO"
+                        )[1]
+                    )
+                )(
+                    pedir_dato_confirmar(
+                        "Cédula (000-000000-0000A)",
+                        str,
+                        validar=lambda v: bool(re.fullmatch(r"\d{3}-\d{6}-\d{4}[A-Z]", v)),
+                        ejemplo="001-123456-0000A",
+                        mayus=True
+                    )
+                )),
+                ("carnet", lambda: (
+                    lambda c: (
+                        c if not any(e["carnet"] == c for e in estudiantes)
+                        else (
+                            print(f"     Ya existe un estudiante con el carnet {c}. Intenta otro."),
+                            "DUPLICADO"
+                        )[1]
+                    )
+                )(
+                    pedir_dato_confirmar(
+                        "Carnet (25-00000-0)",
+                        str,
+                        validar=lambda v: bool(re.fullmatch(r"\d{2}-\d{5}-0", v)),
+                        ejemplo="25-02365-0"
+                    )
+                )),
                 ("municipio", lambda: pedir_dato_confirmar("Municipio", str, mayus=True)),
                 ("departamento", lambda: pedir_dato_confirmar("Departamento", str, mayus=True)),
                 ("edad", lambda: pedir_dato_confirmar("Edad", int, validar=lambda x: 12 <= x <= 80, ejemplo="12 hasta 80")),
                 ("genero", lambda: ("Masculino" if pedir_dato_confirmar("Género (1. Masculino / 2. Femenino)",
                     str, validar=lambda s: s in ["1", "2"]) == "1" else "Femenino")),
-                ("sangre", lambda: pedir_dato_confirmar("Tipo de sangre (A+, A-, B+, B-, AB+, AB-, O+, O-)", str, mayus=True,
-                    validar=lambda v: bool(re.fullmatch(r"^(A|B|AB|O)[+-]$", v.upper())), ejemplo="O+")),
+                ("sangre", lambda: pedir_dato_confirmar(
+                    "Tipo de sangre (A+, A-, B+, B-, AB+, AB-, O+, O-)",
+                    str,
+                    mayus=True,
+                    validar=lambda v: bool(re.fullmatch(r"^(A|B|AB|O)[+-]$", v.upper())),
+                    ejemplo="O+"
+                )),
                 ("modalidad", lambda: {"1": "Presencial", "2": "Virtual", "3": "Mixta"}[
-                    pedir_dato_confirmar("Modalidad (1. Presencial / 2. Virtual / 3. Mixta)", str, validar=lambda s: s in ["1", "2", "3"])]),
+                    pedir_dato_confirmar("Modalidad (1. Presencial / 2. Virtual / 3. Mixta)", str, validar=lambda s: s in ["1", "2", "3"])
+                ]),
                 ("situacion", lambda: {"1": "Regular", "2": "Sabatino", "3": "Dominical"}[
-                    pedir_dato_confirmar("Situación académica (1. Regular / 2. Sabatino / 3. Dominical)", str, validar=lambda s: s in ["1", "2", "3"])]),
+                    pedir_dato_confirmar("Situación académica (1. Regular / 2. Sabatino / 3. Dominical)", str, validar=lambda s: s in ["1", "2", "3"])
+                ]),
                 ("carrera", lambda: pedir_dato_confirmar("Carrera", str, mayus=True)),
                 ("anio", lambda: pedir_dato_confirmar(
-                    "¿En qué año de tu carrera estás? (1-5)", 
-                                                    int, 
-                                                    validar=lambda x: 1 <= x <= 5, 
-                                                    ejemplo="1"
+                    "¿En qué año de tu carrera estás? (1-5)",
+                    int,
+                    validar=lambda x: 1 <= x <= 5,
+                    ejemplo="1"
                 )),
-
                 ("ciclo", lambda: pedir_dato_confirmar(
-                    f"Actualmente estás en el ciclo {(datos['anio']-1)*2+1} o {(datos['anio']-1)*2+2}", 
-                                                    int, 
-                                                    validar=lambda x: x in [(datos['anio']-1)*2+1, (datos['anio']-1)*2+2], 
-                                                    ejemplo=f"{(datos['anio']-1)*2+1} o {(datos['anio']-1)*2+2}"
+                    f"Actualmente estás en el ciclo {(datos['anio']-1)*2+1} o {(datos['anio']-1)*2+2}",
+                    int,
+                    validar=lambda x: x in [(datos['anio']-1)*2+1, (datos['anio']-1)*2+2],
+                    ejemplo=f"{(datos['anio']-1)*2+1} o {(datos['anio']-1)*2+2}"
                 )),
-
                 ("parcial", lambda: pedir_dato_confirmar(
-                    "¿En qué parcial estás actualmente? (1 o 2)", 
-                    int, 
-                    validar=lambda x: x in [1, 2], 
+                    "¿En qué parcial estás actualmente? (1 o 2)",
+                    int,
+                    validar=lambda x: x in [1, 2],
                     ejemplo="1"
                 )),
                 ("area", lambda: pedir_dato_confirmar("Área de conocimiento", str, mayus=True)),
@@ -183,6 +238,7 @@ def agregar_estudiante():
             while idx < len(pasos):
                 campo, funcion = pasos[idx]
                 valor = funcion()
+
                 if valor == "ATRAS":
                     if idx > 0:
                         idx -= 1
@@ -190,9 +246,15 @@ def agregar_estudiante():
                     else:
                         print("   Ya estás en el primer dato.")
                         continue
+
+                if valor == "DUPLICADO":
+                    # No retrocede, solo repite este mismo campo
+                    continue
+
                 datos[campo] = valor
                 idx += 1
 
+            # === IDIOMAS ===
             idiomas_cant = pedir_dato_confirmar("¿Cuántos idiomas domina? (mínimo 1)", int, validar=lambda x: x >= 1, ejemplo="1")
             for j in range(1, idiomas_cant + 1):
                 idioma = pedir_dato_confirmar(f"Idioma {j}", str, mayus=True)
@@ -205,6 +267,7 @@ def agregar_estudiante():
                         continue
                 datos["idiomas"].append(idioma)
 
+            # === MATERIAS ===
             materias_cant = pedir_dato_confirmar("¿Cuántas materias cursa este estudiante?", int, validar=lambda x: x > 0, ejemplo="2")
             mostrar_c2 = True if datos["ciclo"] % 2 == 0 else False
 
@@ -213,15 +276,24 @@ def agregar_estudiante():
                 print(f" Materia {m}")
                 nombre_mat = pedir_dato_confirmar(f"Nombre de la materia {m}", str, mayus=True)
                 notas = {}
+
                 print(f" Ingresando notas para {nombre_mat}:")
                 notas["C1P1"] = pedir_dato_confirmar("Ciclo 1 - Parcial 1 (0-100)", float, validar=lambda x: 0 <= x <= 100)
                 notas["C1P2"] = pedir_dato_confirmar("Ciclo 1 - Parcial 2 (0-100)", float, validar=lambda x: 0 <= x <= 100)
+
                 if mostrar_c2:
                     notas["C2P1"] = pedir_dato_confirmar("Ciclo 2 - Parcial 1 (0-100)", float, validar=lambda x: 0 <= x <= 100)
                     notas["C2P2"] = pedir_dato_confirmar("Ciclo 2 - Parcial 2 (0-100)", float, validar=lambda x: 0 <= x <= 100)
-                promedio_mat = calcular_promedio([v for v in notas.values()])
+
+                promedio_mat = calcular_promedio(list(notas.values()))
                 estado_mat = "Aprobado" if promedio_mat >= 60 else "Reprobado"
-                datos["materias"].append({"materia": nombre_mat, "notas": notas, "promedio": promedio_mat, "estado": estado_mat})
+
+                datos["materias"].append({
+                    "materia": nombre_mat,
+                    "notas": notas,
+                    "promedio": promedio_mat,
+                    "estado": estado_mat
+                })
 
             promedio_general = calcular_promedio([m["promedio"] for m in datos["materias"]])
             estado_final = "Aprobado" if promedio_general >= 60 else "Reprobado"
@@ -242,9 +314,9 @@ def agregar_estudiante():
             for mat in datos["materias"]:
                 print(f"    • {mat['materia']}")
                 notas = mat["notas"]
-                print(f"        C1P1 = {notas.get('C1P1','')}   C1P2 = {notas.get('C1P2','')}")
+                print(f"        C1P1 = {notas.get('C1P1', '')}   C1P2 = {notas.get('C1P2', '')}")
                 if 'C2P1' in notas or 'C2P2' in notas:
-                    print(f"        C2P1 = {notas.get('C2P1','')}   C2P2 = {notas.get('C2P2','')}")
+                    print(f"        C2P1 = {notas.get('C2P1', '')}   C2P2 = {notas.get('C2P2', '')}")
                 print(f"        Promedio: {mat['promedio']:.2f}   Estado: {mat['estado']}")
             print(f"Índice general:     {promedio_general:.2f}")
             print(f"Estado final:       {estado_final}")
@@ -253,7 +325,13 @@ def agregar_estudiante():
                 continue
 
             fecha_registro = datetime.now().strftime("%d/%m/%Y %H:%M:%S")
-            estudiante = {**datos, "promedio": promedio_general, "fecha_registro": fecha_registro, "ultima_modificacion": None}
+            estudiante = {
+                **datos,
+                "promedio": promedio_general,
+                "fecha_registro": fecha_registro,
+                "ultima_modificacion": None
+            }
+
             estudiantes.append(estudiante)
             encolar_estudiante(estudiante)
             registrar_accion(f"Se agregó a {datos['nombre']} {datos['apellido']} con carnet {datos['carnet']}")
@@ -263,6 +341,7 @@ def agregar_estudiante():
     except KeyboardInterrupt:
         print("\n Operación cancelada. Regresando al menú principal...")
         return
+
 
 
 
